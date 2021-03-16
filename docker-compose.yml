@@ -1,0 +1,114 @@
+version: "3"
+
+networks:
+  sidakanak:
+
+services:
+  site:
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
+    container_name: nginx-sidakanak
+    restart: always
+    ports:
+      - 1001:80
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - php
+      - redis
+      - mysql
+      - adminer
+    networks:
+      - sidakanak
+
+  mysql:
+    image: mysql:8.0.23
+    container_name: mysql-sidakanak
+    tty: true
+    restart: always
+    ports:
+      - 1002:3306
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: sidakanak
+      MYSQL_USER: root
+      MYSQL_PASSWORD: buyung
+      MYSQL_ROOT_PASSWORD: buyung
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - sidakanak
+
+  adminer:
+    build:
+      context: .
+      dockerfile: adminer.dockerfile
+    container_name: adminer-sidakanak
+    restart: always
+    ports:
+      - 1003:8080
+    networks:
+      - sidakanak
+
+  php:
+    build:
+      context: .
+      dockerfile: php.dockerfile
+    container_name: php-sidakanak
+    restart: always
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - sidakanak
+
+  redis:
+    image: redis:alpine
+    container_name: redis-sidakanak
+    restart: always
+    ports:
+      - 1004:6379
+    networks:
+      - sidakanak
+
+  composer:
+    # build:
+    #   context: .
+    #   dockerfile: composer.dockerfile
+    image: composer:latest
+    container_name: composer-sidakanak
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    # depends_on:
+    #   - php
+    # user: laravel
+    # entrypoint: ["composer"]
+    networks:
+      - sidakanak
+
+  npm:
+    image: node:13.7
+    container_name: npm-sidakanak
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ["npm"]
+    networks:
+      - sidakanak
+
+  artisan:
+    build:
+      context: .
+      dockerfile: php.dockerfile
+    container_name: artisan-sidakanak
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+    working_dir: /var/www/html
+    user: laravel
+    entrypoint: ["php", "/var/www/html/artisan"]
+    networks:
+      - sidakanak
