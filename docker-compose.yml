@@ -1,14 +1,14 @@
 version: "3"
 
 networks:
-  sidakanak:
+  spa:
 
 services:
   site:
     build:
       context: .
       dockerfile: nginx.dockerfile
-    container_name: nginx-sidakanak
+    container_name: nginx-spa
     restart: always
     ports:
       - 1001:80
@@ -20,11 +20,11 @@ services:
       - mysql
       - adminer
     networks:
-      - sidakanak
+      - spa
 
   mysql:
     image: mysql:8.0.23
-    container_name: mysql-sidakanak
+    container_name: mysql-spa
     tty: true
     restart: always
     ports:
@@ -32,52 +32,52 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     environment:
-      MYSQL_DATABASE: sidakanak
+      MYSQL_DATABASE: spa
       MYSQL_USER: root
       MYSQL_PASSWORD: buyung
       MYSQL_ROOT_PASSWORD: buyung
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     networks:
-      - sidakanak
+      - spa
 
   adminer:
     build:
       context: .
       dockerfile: adminer.dockerfile
-    container_name: adminer-sidakanak
+    container_name: adminer-spa
     restart: always
     ports:
       - 1003:8080
     networks:
-      - sidakanak
+      - spa
 
   php:
     build:
       context: .
       dockerfile: php.dockerfile
-    container_name: php-sidakanak
+    container_name: php-spa
     restart: always
     volumes:
       - ./src:/var/www/html
     networks:
-      - sidakanak
+      - spa
 
   redis:
     image: redis:alpine
-    container_name: redis-sidakanak
+    container_name: redis-spa
     restart: always
     ports:
       - 1004:6379
     networks:
-      - sidakanak
+      - spa
 
   composer:
     # build:
     #   context: .
     #   dockerfile: composer.dockerfile
     image: composer:latest
-    container_name: composer-sidakanak
+    container_name: composer-spa
     volumes:
       - ./src:/var/www/html
     working_dir: /var/www/html
@@ -86,23 +86,23 @@ services:
     # user: laravel
     # entrypoint: ["composer"]
     networks:
-      - sidakanak
+      - spa
 
   npm:
     image: node:13.7
-    container_name: npm-sidakanak
+    container_name: npm-spa
     volumes:
       - ./src:/var/www/html
     working_dir: /var/www/html
     entrypoint: ["npm"]
     networks:
-      - sidakanak
+      - spa
 
   artisan:
     build:
       context: .
       dockerfile: php.dockerfile
-    container_name: artisan-sidakanak
+    container_name: artisan-spa
     volumes:
       - ./src:/var/www/html
     depends_on:
@@ -111,4 +111,4 @@ services:
     user: laravel
     entrypoint: ["php", "/var/www/html/artisan"]
     networks:
-      - sidakanak
+      - spa
